@@ -9,7 +9,7 @@ function getPosition(containment, el) {
     }
 }
 
-export default class Draggable {
+export default class ElDraggable {
     constructor(el, config) {
         const conf = {
             bubble: true,
@@ -26,6 +26,7 @@ export default class Draggable {
         this.mouseMove = throttle(e => {
             const offsetY = e.clientY - status.clientY
             const offsetX = e.clientX - status.clientX
+            console.log(offsetX, offsetY, style)
             style.maxOffsetX = conf.containment.clientWidth - el.clientWidth
             style.maxOffsetY = conf.containment.clientHeight - el.clientHeight
             status.clientX = e.clientX
@@ -54,7 +55,9 @@ export default class Draggable {
             conf.updatePosition(e, style)
             conf.onDrag && conf.onDrag(e, style)
         }, conf.throttle)
+
         this.handler = el.querySelector(conf.handler) || el
+        this.containment = conf.containment
 
         let style = {
             left: 0,
@@ -69,13 +72,14 @@ export default class Draggable {
         }
 
         this.handler.addEventListener('mousedown', e => {
-            const initPosition = getPosition(conf.containment, el)
+            console.log(e)
+            const initPosition = getPosition(el.offsetParent, el)
             status.clientX = e.clientX
             status.clientY = e.clientY
             status.dragging = true
             el.style.top = initPosition.top + 'px'
             el.style.left = initPosition.left + 'px'
-            style = getPosition(conf.containment, el)
+            style = initPosition
             document.addEventListener('mousemove', this.mouseMove)
             !conf.bubble && e.preventDefault()
         })
@@ -83,7 +87,8 @@ export default class Draggable {
             if (status.dragging) {
                 document.removeEventListener('mousemove', this.mouseMove)
                 conf.onEnd && conf.onEnd(e, style)
-            }!conf.bubble && e.preventDefault()
+            }
+            !conf.bubble && e.preventDefault()
         })
     }
 

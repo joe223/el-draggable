@@ -44,24 +44,57 @@
             left: 60%;
             background: #8d5cff;
         }
+        .handler {
+            display: block;
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            text-align: center;
+            line-height: 30px;
+            color: #ffffff;
+            cursor: move;
+            background: inherit;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="box-1" class="box">A</div>
-        <div id="box-2" class="box">B</div>
-        <div id="box-3" class="box">C</div>
+        <div id="box-1" class="box"><span class="handler">A</span></div>
+        <div id="box-2" class="box"><span class="handler">B</span></div>
+        <div id="box-3" class="box"><span class="handler">C</span></div>
     </div>
     <script src="./../index.min.js"></script>
     <script>
         const containment = document.querySelector('.container')
-        new ElDraggable(document.getElementById('box-1'), {
+        const box1 = document.getElementById('box-1')
+        const box2 = document.getElementById('box-2')
+        const box3 = document.getElementById('box-3')
+        
+        const a = new ElDraggable(box1, {
             overflow: false,
             containment: containment,
+            handler: 'span',
             throttle: 30
         });
-        new ElDraggable(document.getElementById('box-2'));
-        new ElDraggable(document.getElementById('box-3'));
+        const b = new ElDraggable(box2,  {
+            overflow: true,
+            containment: containment,
+            throttle: 0
+        });
+        const c = new ElDraggable(box3, {
+            overflow: false
+        });
+        function getPosition(containment, el) {
+            const containmentPosition = containment.getBoundingClientRect()
+            const elPosition = el.getBoundingClientRect()
+            return {
+                top: elPosition.top - containmentPosition.top,
+                left: elPosition.left - containmentPosition.left
+            }
+        }
+        console.log(getPosition(containment, box1))
+        console.log(getPosition(document.body, box2))
+        console.log(getPosition(document.body, box3))
     </script>
 </body>
 </html>
