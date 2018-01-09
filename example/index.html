@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Example</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        body {
+            padding: 20px 40px;
+        }
+        .container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            background: #eeeeee;
+        }
+        .box {
+            position: absolute;
+            top: 100px;
+            height: 100px;
+            width: 100px;
+            border-radius: 50px;
+        }
+        #box-1 {
+            left: 40%;
+            background: #ff6060;
+        }
+        #box-2 {
+            left: 50%;
+            background: #0ead93;
+        }
+        #box-3 {
+            left: 60%;
+            background: #8d5cff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="box-1" class="box">A</div>
+        <div id="box-2" class="box">B</div>
+        <div id="box-3" class="box">C</div>
+    </div>
+    <script src="./../index.min.js"></script>
+    <script>
+        const containment = document.querySelector('.container')
+        new ElDraggable(document.getElementById('box-1'), {
+            overflow: false,
+            containment: containment,
+            throttle: 30
+        });
+        new ElDraggable(document.getElementById('box-2'));
+        new ElDraggable(document.getElementById('box-3'));
+    </script>
+</body>
+</html>
