@@ -24,7 +24,7 @@ export default class ElDraggable {
         }
         const _this = this
         const { conf, border } = this
-        
+
         Object.assign(conf, config)
         this.border = {
             top: 0,
@@ -40,7 +40,6 @@ export default class ElDraggable {
             const { border } = this
             const offsetY = e.clientY - status.clientY
             const offsetX = e.clientX - status.clientX
-            // console.log(offsetX, offsetY, style)
             _this.updateBorder.call(_this)
             status.clientX = e.clientX
             status.clientY = e.clientY
@@ -49,7 +48,7 @@ export default class ElDraggable {
             if (!conf.overflow) {
                 if (left > border.right) {
                     style.left = border.right
-                } else if (left < border.left) { 
+                } else if (left < border.left) {
                     style.left = border.left
                 } else {
                     style.left = left
@@ -82,7 +81,6 @@ export default class ElDraggable {
             clientX: null,
             clientY: null
         }
-
         this.handler.addEventListener('mousedown', e => {
             const initPosition = getPosition(el.offsetParent, el)
             status.clientX = e.clientX
@@ -92,15 +90,17 @@ export default class ElDraggable {
             el.style.left = initPosition.left + 'px'
             style = initPosition
             document.addEventListener('mousemove', this.mouseMove)
-            conf.onStart && conf.onStart(e, style)            
-            !conf.bubble && e.preventDefault()
+            conf.onStart && conf.onStart(e, style)
+			!conf.bubble && e.stopPropagation()
+			e.preventDefault()
         })
         document.addEventListener('mouseup', e => {
             if (status.dragging) {
                 document.removeEventListener('mousemove', this.mouseMove)
                 conf.onEnd && conf.onEnd(e, style)
             }
-            !conf.bubble && e.preventDefault()
+            !conf.bubble && e.stopPropagation()
+            e.preventDefault()
         })
     }
     updateBorder () {
