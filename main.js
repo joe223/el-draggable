@@ -11,7 +11,8 @@ function getPosition(containment, el) {
 
 export default class ElDraggable {
     constructor(el, config) {
-        const conf = {
+        this.conf = {
+            el: el,
             bubble: true,
             throttle: 0,
             containment: document.body,
@@ -21,30 +22,42 @@ export default class ElDraggable {
                 el.style.top = p.top + 'px'
             }
         }
+        const _this = this
+        const { conf, border } = this
+        
         Object.assign(conf, config)
-
+        this.border = {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0
+        }
+        this.size = {
+            width: el.clientWidth,
+            height: el.clientHeight
+        }
         this.mouseMove = throttle(e => {
+            const { border } = this
             const offsetY = e.clientY - status.clientY
             const offsetX = e.clientX - status.clientX
-            console.log(offsetX, offsetY, style)
-            style.maxOffsetX = conf.containment.clientWidth - el.clientWidth
-            style.maxOffsetY = conf.containment.clientHeight - el.clientHeight
+            // console.log(offsetX, offsetY, style)
+            _this.updateBorder.call(_this)
             status.clientX = e.clientX
             status.clientY = e.clientY
             let left = style.left + offsetX
             let top = style.top + offsetY
             if (!conf.overflow) {
-                if (left > style.maxOffsetX) {
-                    style.left = style.maxOffsetX
-                } else if (left < 0) {
-                    style.left = 0
+                if (left > border.right) {
+                    style.left = border.right
+                } else if (left < border.left) { 
+                    style.left = border.left
                 } else {
                     style.left = left
                 }
-                if (top > style.maxOffsetY) {
-                    style.top = style.maxOffsetY
-                } else if (top < 0) {
-                    style.top = 0
+                if (top > border.bottom) {
+                    style.top = border.bottom
+                } else if (top < border.top) {
+                    style.top = border.top
                 } else {
                     style.top = top
                 }
@@ -62,9 +75,8 @@ export default class ElDraggable {
         let style = {
             left: 0,
             top: 0,
-            maxOffsetX: conf.containment.clientWidth - el.clientWidth,
-            maxOffsetY: conf.containment.clientHeight - el.clientHeight
         }
+
         let status = {
             dragging: false,
             clientX: null,
@@ -72,7 +84,6 @@ export default class ElDraggable {
         }
 
         this.handler.addEventListener('mousedown', e => {
-            console.log(e)
             const initPosition = getPosition(el.offsetParent, el)
             status.clientX = e.clientX
             status.clientY = e.clientY
@@ -81,6 +92,7 @@ export default class ElDraggable {
             el.style.left = initPosition.left + 'px'
             style = initPosition
             document.addEventListener('mousemove', this.mouseMove)
+            conf.onStart && conf.onStart(e, style)            
             !conf.bubble && e.preventDefault()
         })
         document.addEventListener('mouseup', e => {
@@ -91,5 +103,15 @@ export default class ElDraggable {
             !conf.bubble && e.preventDefault()
         })
     }
-
+    updateBorder () {
+        const { size } = this
+        const { containment, el } = this.conf
+        const offsetParent = el.offsetParent
+        const containmentPosition = containment.getBoundingClientRect()
+        const offsetParentPosition = offsetParent.getBoundingClientRect()
+        this.border.top = containmentPosition.top - offsetParentPosition.top
+        this.border.bottom = containmentPosition.bottom - offsetParentPosition.top - size.height
+        this.border.left = containmentPosition.left - offsetParentPosition.left
+        this.border.right = containmentPosition.right - offsetParentPosition.left - size.width
+    }
 }

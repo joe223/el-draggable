@@ -18,6 +18,7 @@
         }
         body {
             padding: 20px 40px;
+            min-height: 700px;
         }
         .container {
             position: relative;
@@ -74,7 +75,16 @@
             overflow: false,
             containment: containment,
             handler: 'span',
-            throttle: 30
+            throttle: 30,
+            onStart () {
+                box1.style.zIndex = 999
+            },
+            onDrag (e, position) {
+                // 
+            },
+            onEnd () {
+                box1.style.zIndex = 'auto'                
+            }
         });
         const b = new ElDraggable(box2,  {
             overflow: true,
