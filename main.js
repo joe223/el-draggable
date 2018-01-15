@@ -1,14 +1,5 @@
 import throttle from 'lodash/throttle'
 
-function getPosition(containment, el) {
-    const containmentPosition = containment.getBoundingClientRect()
-    const elPosition = el.getBoundingClientRect()
-    return {
-        top: elPosition.top - containmentPosition.top,
-        left: elPosition.left - containmentPosition.left
-    }
-}
-
 export default class ElDraggable {
     constructor(el, config) {
         this.conf = {
@@ -39,13 +30,15 @@ export default class ElDraggable {
         this.mouseMove = throttle(e => {
             const { border } = this
             const offsetY = e.clientY - status.clientY
-            const offsetX = e.clientX - status.clientX
-            _this.updateBorder.call(_this)
+            const offsetX = e.clientX - status.clientX            
+            // _this.updateBorder.call(_this)
             status.clientX = e.clientX
             status.clientY = e.clientY
             let left = style.left + offsetX
             let top = style.top + offsetY
             if (!conf.overflow) {
+                console.log(left, top)
+                
                 if (left > border.right) {
                     style.left = border.right
                 } else if (left < border.left) {
@@ -82,7 +75,10 @@ export default class ElDraggable {
             clientY: null
         }
         this.handler.addEventListener('mousedown', e => {
-            const initPosition = getPosition(el.offsetParent, el)
+            this.cacheMargin()
+            const initPosition = this.getPosition(el.offsetParent, el, this.margin)
+            console.log(initPosition)
+            this.updateBorder()
             status.clientX = e.clientX
             status.clientY = e.clientY
             status.dragging = true
@@ -98,20 +94,49 @@ export default class ElDraggable {
             if (status.dragging) {
                 document.removeEventListener('mousemove', this.mouseMove)
                 conf.onEnd && conf.onEnd(e, style)
+                status.dragging = false
             }
             !conf.bubble && e.stopPropagation()
             e.preventDefault()
         })
     }
+
     updateBorder () {
         const { size } = this
         const { containment, el } = this.conf
         const offsetParent = el.offsetParent
         const containmentPosition = containment.getBoundingClientRect()
         const offsetParentPosition = offsetParent.getBoundingClientRect()
+        const margin = this.getMargin(el)
         this.border.top = containmentPosition.top - offsetParentPosition.top
-        this.border.bottom = containmentPosition.bottom - offsetParentPosition.top - size.height
+        this.border.bottom = offsetParentPosition.bottom - size.height - containmentPosition.bottom + containmentPosition.height - margin.bottom - margin.top
         this.border.left = containmentPosition.left - offsetParentPosition.left
-        this.border.right = containmentPosition.right - offsetParentPosition.left - size.width
+        this.border.right = containmentPosition.left + containmentPosition.width - offsetParentPosition.left - size.width - margin.right - margin.left
+    }
+
+    getMargin (el) {
+        return {
+            top: parseInt(getComputedStyle(el)['marginTop']),
+            right: parseInt(getComputedStyle(el)['marginRight']),
+            bottom: parseInt(getComputedStyle(el)['marginBottom']),
+            left: parseInt(getComputedStyle(el)['marginLeft']),
+        }
+    }
+
+    getPosition (containment, el, margin) {
+        const containmentPosition = containment.getBoundingClientRect()
+        const elPosition = el.getBoundingClientRect()
+        if (margin === void 0) {
+            margin = this.getMargin(el)
+        }
+        return {
+            top: elPosition.top - containmentPosition.top - margin.top,
+            left: elPosition.left - containmentPosition.left - margin.left
+        }
+    }
+
+    cacheMargin () {
+        this.margin = this.getMargin(this.conf.el)
     }
 }
+
