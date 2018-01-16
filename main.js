@@ -31,14 +31,11 @@ export default class ElDraggable {
             const { border } = this
             const offsetY = e.clientY - status.clientY
             const offsetX = e.clientX - status.clientX            
-            // _this.updateBorder.call(_this)
             status.clientX = e.clientX
             status.clientY = e.clientY
             let left = style.left + offsetX
             let top = style.top + offsetY
             if (!conf.overflow) {
-                console.log(left, top)
-                
                 if (left > border.right) {
                     style.left = border.right
                 } else if (left < border.left) {
@@ -59,6 +56,7 @@ export default class ElDraggable {
             }
             conf.updatePosition(e, style)
             conf.onDrag && conf.onDrag(e, style)
+			!conf.bubble && e.stopPropagation()            
         }, conf.throttle)
 
         this.handler = el.querySelector(conf.handler) || el
@@ -77,13 +75,10 @@ export default class ElDraggable {
         this.handler.addEventListener('mousedown', e => {
             this.cacheMargin()
             const initPosition = this.getPosition(el.offsetParent, el, this.margin)
-            console.log(initPosition)
             this.updateBorder()
             status.clientX = e.clientX
             status.clientY = e.clientY
             status.dragging = true
-            el.style.top = initPosition.top + 'px'
-            el.style.left = initPosition.left + 'px'
             style = initPosition
             document.addEventListener('mousemove', this.mouseMove)
             conf.onStart && conf.onStart(e, style)
@@ -96,7 +91,6 @@ export default class ElDraggable {
                 conf.onEnd && conf.onEnd(e, style)
                 status.dragging = false
             }
-            !conf.bubble && e.stopPropagation()
             e.preventDefault()
         })
     }
@@ -139,4 +133,3 @@ export default class ElDraggable {
         this.margin = this.getMargin(this.conf.el)
     }
 }
-
