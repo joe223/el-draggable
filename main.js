@@ -13,22 +13,21 @@ export default class ElDraggable {
                 el.style.top = p.top + 'px'
             }
         }
-        const _this = this
-        const { conf, border } = this
-
-        Object.assign(conf, config)
         this.border = {
             top: 0,
             right: 0,
             bottom: 0,
             left: 0
         }
+        const { conf, border } = this
+
+        Object.assign(conf, config)
+
         this.size = {
             width: el.clientWidth,
             height: el.clientHeight
         }
         this.mouseMove = throttle(e => {
-            const { border } = this
             const offsetY = e.clientY - status.clientY
             const offsetX = e.clientX - status.clientX            
             status.clientX = e.clientX
@@ -55,11 +54,10 @@ export default class ElDraggable {
                 style.top = top
             }
             conf.updatePosition(e, style)
+            !conf.bubble && e.stopPropagation()
             conf.onDrag && conf.onDrag(e, style)
-			!conf.bubble && e.stopPropagation()            
         }, conf.throttle)
 
-        this.handler = el.querySelector(conf.handler) || el
         this.containment = conf.containment
 
         let style = {
@@ -72,7 +70,11 @@ export default class ElDraggable {
             clientX: null,
             clientY: null
         }
-        this.handler.addEventListener('mousedown', e => {
+        el.addEventListener('mousedown', e => {
+            if (conf.handler) {
+                const handler = el.querySelector(conf.handler)
+                if (!(handler && handler.contains(e.target))) return
+            }
             this.cacheMargin()
             const initPosition = this.getPosition(el.offsetParent, el, this.margin)
             this.updateBorder()
